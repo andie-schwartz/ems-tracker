@@ -2,6 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const traineeRoutes = require('./routes/trainees');
+const skillRoutes = require('./routes/skills');
+const notificationRoutes = require('./routes/notifications');
+const settingsRoutes = require('./routes/settings');
 require('dotenv').config();
 
 const app = express();
@@ -27,6 +32,11 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/trainees', traineeRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚑 EMS Tracker running on http://localhost:${PORT}`);
