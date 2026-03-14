@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import api from './utils/api'
 import Login from './pages/Login'
+import Layout from './components/Layout'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState('dashboard')
 
   useEffect(() => {
     api.get('/auth/me')
@@ -14,17 +17,16 @@ function App() {
   }, [])
 
   if (loading) return <div style={{padding:'40px',textAlign:'center'}}>Loading…</div>
-
   if (!user) return <Login setUser={setUser} />
 
   return (
-    <div>
-      <h1>Welcome {user.name}!</h1>
-      <p>Role: {user.role}</p>
-      <button onClick={() => {
-        api.post('/auth/logout').then(() => setUser(null))
-      }}>Sign out</button>
-    </div>
+    <Layout user={user} setUser={setUser} currentPage={currentPage} setCurrentPage={setCurrentPage}>
+      {currentPage === 'dashboard' && <Dashboard user={user} setCurrentPage={setCurrentPage} />}
+      {currentPage === 'trainees' && <div>Trainees page coming soon</div>}
+      {currentPage === 'notifications' && <div>Notifications page coming soon</div>}
+      {currentPage === 'users' && <div>Users page coming soon</div>}
+      {currentPage === 'settings' && <div>Settings page coming soon</div>}
+    </Layout>
   )
 }
 
