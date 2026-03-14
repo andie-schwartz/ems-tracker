@@ -5,6 +5,9 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import TraineeProfile from './pages/TraineeProfile'
 import Notifications from './pages/Notifications'
+import Trainees from './pages/Trainees'
+import Users from './pages/Users'
+import Settings from './pages/Settings'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -25,11 +28,11 @@ function App() {
   return (
     <Layout user={user} setUser={setUser} currentPage={currentPage} setCurrentPage={setCurrentPage}>
       {currentPage === 'dashboard' && <Dashboard user={user} setCurrentPage={setCurrentPage} setSelectedTrainee={setSelectedTrainee} />}
-      {currentPage === 'trainees' && <div>Trainees page coming soon</div>}
+      {currentPage === 'trainees' && <Trainees user={user} setCurrentPage={setCurrentPage} setSelectedTrainee={setSelectedTrainee} />}
       {currentPage === 'profile' && <TraineeProfile traineeId={selectedTrainee} user={user} setCurrentPage={setCurrentPage} />}
       {currentPage === 'notifications' && <Notifications />}
-      {currentPage === 'users' && <div>Users page coming soon</div>}
-      {currentPage === 'settings' && <div>Settings page coming soon</div>}
+      {currentPage === 'users' && <Users />}
+      {currentPage === 'settings' && <Settings />}
     </Layout>
   )
 }
