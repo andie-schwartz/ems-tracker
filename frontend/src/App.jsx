@@ -8,6 +8,7 @@ function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState('dashboard')
+  const [selectedTrainee, setSelectedTrainee] = useState(null)
 
   useEffect(() => {
     api.get('/auth/me')
@@ -21,7 +22,7 @@ function App() {
 
   return (
     <Layout user={user} setUser={setUser} currentPage={currentPage} setCurrentPage={setCurrentPage}>
-      {currentPage === 'dashboard' && <Dashboard user={user} setCurrentPage={setCurrentPage} />}
+      {currentPage === 'dashboard' && <Dashboard user={user} setCurrentPage={setCurrentPage} setSelectedTrainee={setSelectedTrainee} />}
       {currentPage === 'trainees' && <div>Trainees page coming soon</div>}
       {currentPage === 'notifications' && <div>Notifications page coming soon</div>}
       {currentPage === 'users' && <div>Users page coming soon</div>}
