@@ -169,4 +169,40 @@ router.post('/evaluate', requireRole('admin', 'instructor'), (req, res) => {
   });
 });
 
+// POST /api/skills/categories — add a new category
+router.post('/categories', requireRole('admin'), (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'Category name is required.' });
+
+  const id = uuidv4();
+  const maxOrder = db.prepare('SELECT MAX(order_index) as max FROM skill_categories').get();
+  db.prepare('INSERT INTO skill_categories (id, name, order_index) VALUES (?, ?, ?)').run(id, name, (maxOrder.max || 0) + 1);
+
+  res.status(201).json({ id, name });
+});
+
+// DELETE /api/skills/categories/:id — delete a category and its skills
+router.delete('/categories/:id', requireRole('admin'), (req, res) => {
+  db.prepare('DELETE FROM skill_categories WHERE id = ?').run(req.params.id);
+  res.json({ message: 'Category deleted.' });
+});
+
+// POST /api/skills/item — add a skill to a category
+router.post('/item', requireRole('admin'), (req, res) => {
+  const { category_id, name } = req.body;
+  if (!category_id || !name) return res.status(400).json({ error: 'category_id and name are required.' });
+
+  const id = uuidv4();
+  const maxOrder = db.prepare('SELECT MAX(order_index) as max FROM skills WHERE category_id = ?').get(category_id);
+  db.prepare('INSERT INTO skills (id, category_id, name, order_index) VALUES (?, ?, ?, ?)').run(id, category_id, name, (maxOrder.max || 0) + 1);
+
+  res.status(201).json({ id, name });
+});
+
+// DELETE /api/skills/item/:id — delete a skill
+router.delete('/item/:id', requireRole('admin'), (req, res) => {
+  db.prepare('DELETE FROM skills WHERE id = ?').run(req.params.id);
+  res.json({ message: 'Skill deleted.' });
+});
+
 module.exports = router;

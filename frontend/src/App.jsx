@@ -8,6 +8,7 @@ import Notifications from './pages/Notifications'
 import Trainees from './pages/Trainees'
 import Users from './pages/Users'
 import Settings from './pages/Settings'
+import Skills from './pages/Skills'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -33,6 +34,7 @@ function App() {
       {currentPage === 'notifications' && <Notifications />}
       {currentPage === 'users' && <Users />}
       {currentPage === 'settings' && <Settings />}
+      {currentPage === 'skills' && <Skills />}
     </Layout>
   )
 }

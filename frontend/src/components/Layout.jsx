@@ -14,6 +14,7 @@ function Layout({ user, setUser, children, currentPage, setCurrentPage }) {
     { id: 'trainees', label: user.role === 'trainee' ? 'My Progress' : user.role === 'instructor' ? 'My Trainees' : 'All Trainees', icon: '👥' },
     { id: 'notifications', label: 'Alerts', icon: '🔔', roles: ['admin', 'instructor'] },
     { id: 'users', label: 'Users', icon: '🔑', roles: ['admin'] },
+     { id: 'skills', label: 'Skills', icon: '📋', roles: ['admin'] },
     { id: 'settings', label: 'Settings', icon: '⚙', roles: ['admin'] },
   ].filter(item => !item.roles || item.roles.includes(user.role))
 
