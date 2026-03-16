@@ -19,12 +19,16 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
   const [trainee, setTrainee] = useState(null)
   const [skillData, setSkillData] = useState(null)
   const [notes, setNotes] = useState([])
+  const [callLogs, setCallLogs] = useState([])
+  const [callTypes, setCallTypes] = useState([])
   const [loading, setLoading] = useState(true)
   const [newNote, setNewNote] = useState('')
   const [addingNote, setAddingNote] = useState(false)
   const [evaluating, setEvaluating] = useState(null)
   const [evalScore, setEvalScore] = useState(null)
   const [evalNote, setEvalNote] = useState('')
+  const [showCallModal, setShowCallModal] = useState(false)
+  const [callForm, setCallForm] = useState({ call_date: '', call_type: '', supervisor: '', notes: '' })
 
   const canEdit = user.role === 'admin' || user.role === 'instructor'
 
@@ -34,14 +38,18 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
 
   const loadAll = async () => {
     try {
-      const [tRes, skRes, nRes] = await Promise.all([
+      const [tRes, skRes, nRes, clRes, ctRes] = await Promise.all([
         api.get(`/trainees/${traineeId}`),
         api.get(`/skills/trainee/${traineeId}`),
         api.get(`/trainees/${traineeId}/notes`),
+        api.get(`/calllogs/trainee/${traineeId}`),
+        api.get(`/calllogs/types`),
       ])
       setTrainee(tRes.data)
       setSkillData(skRes.data)
       setNotes(nRes.data)
+      setCallLogs(clRes.data.logs)
+      setCallTypes(ctRes.data)
     } catch (e) {
       console.error(e)
     } finally {
@@ -73,6 +81,28 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
       setEvaluating(null)
       setEvalScore(null)
       setEvalNote('')
+      loadAll()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const submitCallLog = async () => {
+    if (!callForm.call_date || !callForm.call_type) return
+    try {
+      await api.post(`/calllogs/trainee/${traineeId}`, callForm)
+      setCallForm({ call_date: '', call_type: '', supervisor: '', notes: '' })
+      setShowCallModal(false)
+      loadAll()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const deleteCallLog = async (id) => {
+    if (!confirm('Delete this call log entry?')) return
+    try {
+      await api.delete(`/calllogs/${id}`)
       loadAll()
     } catch (e) {
       console.error(e)
@@ -118,6 +148,7 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
             { val: `${summary.percent}%`, label: 'Passed' },
             { val: summary.passed, label: 'Skills Done' },
             { val: summary.total - summary.passed, label: 'Remaining' },
+            { val: callLogs.length, label: 'Patient Calls' },
           ].map(s => (
             <div key={s.label} style={{ textAlign: 'center' }}>
               <div style={{ fontFamily: 'Libre Baskerville, serif', fontSize: '1.4rem', fontWeight: '700', color: '#1a2e4a' }}>{s.val}</div>
@@ -231,9 +262,11 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
           </div>
         </div>
 
-        {/* ── RIGHT: Notes ── */}
+        {/* ── RIGHT: Notes + Call Log ── */}
         <div>
-          <div style={{ background: '#fff', border: '1px solid #dde3eb', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(26,46,74,0.08)' }}>
+
+          {/* Notes */}
+          <div style={{ background: '#fff', border: '1px solid #dde3eb', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(26,46,74,0.08)', marginBottom: '20px' }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #dde3eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ fontFamily: 'Libre Baskerville, serif', fontSize: '0.95rem', fontWeight: '700', color: '#1a2e4a' }}>Supervisor Notes</div>
               {canEdit && (
@@ -272,7 +305,6 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
                   </div>
                 </div>
               )}
-
               {notes.length === 0 && !addingNote ? (
                 <div style={{ textAlign: 'center', padding: '32px', color: '#8795a8', fontSize: '0.875rem' }}>No notes yet</div>
               ) : (
@@ -288,10 +320,135 @@ function TraineeProfile({ traineeId, user, setCurrentPage }) {
               )}
             </div>
           </div>
+
+          {/* Call Log */}
+          <div style={{ background: '#fff', border: '1px solid #dde3eb', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(26,46,74,0.08)' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #dde3eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontFamily: 'Libre Baskerville, serif', fontSize: '0.95rem', fontWeight: '700', color: '#1a2e4a' }}>
+                Patient Calls <span style={{ fontFamily: 'Source Code Pro, monospace', fontSize: '0.8rem', color: '#8795a8', fontWeight: '400' }}>({callLogs.length} total)</span>
+              </div>
+              {canEdit && (
+                <button onClick={() => setShowCallModal(true)} style={{
+                  background: '#f4f6f9', border: '1px solid #dde3eb', borderRadius: '6px',
+                  padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer',
+                  fontFamily: 'Source Sans 3, sans-serif', color: '#4a5568'
+                }}>+ Log Call</button>
+              )}
+            </div>
+            <div style={{ padding: '16px' }}>
+              {callLogs.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '24px', color: '#8795a8', fontSize: '0.875rem' }}>No calls logged yet</div>
+              ) : (
+                callLogs.map(log => (
+                  <div key={log.id} style={{ padding: '12px', background: '#f4f6f9', border: '1px solid #dde3eb', borderRadius: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{
+                          background: '#e8edf5', border: '1px solid #c5d0e0', color: '#1a2e4a',
+                          padding: '2px 8px', borderRadius: '20px', fontSize: '0.72rem',
+                          fontFamily: 'Source Code Pro, monospace'
+                        }}>{log.call_type}</span>
+                        <span style={{ fontSize: '0.78rem', color: '#8795a8', fontFamily: 'Source Code Pro, monospace' }}>
+                          {new Date(log.call_date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {canEdit && (
+                        <button onClick={() => deleteCallLog(log.id)} style={{
+                          background: 'transparent', border: 'none', color: '#8795a8',
+                          cursor: 'pointer', fontSize: '0.75rem', padding: '0'
+                        }}>✕</button>
+                      )}
+                    </div>
+                    {log.supervisor && <div style={{ fontSize: '0.8rem', color: '#4a5568', marginBottom: '4px' }}>Supervisor: <strong>{log.supervisor}</strong></div>}
+                    {log.notes && <div style={{ fontSize: '0.8rem', color: '#4a5568', lineHeight: '1.5' }}>{log.notes}</div>}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
+
+      {/* Add Call Modal */}
+      {showCallModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 200, padding: '20px'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '12px', padding: '28px',
+            width: '100%', maxWidth: '440px',
+            boxShadow: '0 12px 32px rgba(26,46,74,0.14)'
+          }}>
+            <h3 style={{ fontFamily: 'Libre Baskerville, serif', fontSize: '1.2rem', color: '#1a2e4a', marginBottom: '20px' }}>Log Patient Call</h3>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Date of Call</label>
+              <input type="date" value={callForm.call_date}
+                onChange={e => setCallForm({ ...callForm, call_date: e.target.value })}
+                style={inputStyle} />
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Call Type</label>
+              <select value={callForm.call_type}
+                onChange={e => setCallForm({ ...callForm, call_type: e.target.value })}
+                style={inputStyle}>
+                <option value="">— Select type —</option>
+                {callTypes.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={labelStyle}>Supervisor Present</label>
+              <input type="text" placeholder="Name of supervising paramedic..."
+                value={callForm.supervisor}
+                onChange={e => setCallForm({ ...callForm, supervisor: e.target.value })}
+                style={inputStyle} />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={labelStyle}>Notes</label>
+              <textarea placeholder="Any observations or details..."
+                value={callForm.notes}
+                onChange={e => setCallForm({ ...callForm, notes: e.target.value })}
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowCallModal(false)} style={{
+                background: 'transparent', border: '1px solid #dde3eb', borderRadius: '8px',
+                padding: '9px 18px', fontSize: '0.875rem', cursor: 'pointer',
+                fontFamily: 'Source Sans 3, sans-serif', color: '#4a5568'
+              }}>Cancel</button>
+              <button onClick={submitCallLog} disabled={!callForm.call_date || !callForm.call_type} style={{
+                background: callForm.call_date && callForm.call_type ? '#0d7a6e' : '#dde3eb',
+                color: callForm.call_date && callForm.call_type ? '#fff' : '#8795a8',
+                border: 'none', borderRadius: '8px', padding: '9px 18px',
+                fontSize: '0.875rem', fontWeight: '500',
+                cursor: callForm.call_date && callForm.call_type ? 'pointer' : 'not-allowed',
+                fontFamily: 'Source Sans 3, sans-serif'
+              }}>Save Call</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
+}
+
+const labelStyle = {
+  display: 'block', fontSize: '0.75rem', fontFamily: 'Source Code Pro, monospace',
+  textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8795a8', marginBottom: '5px'
+}
+
+const inputStyle = {
+  width: '100%', padding: '9px 12px', border: '1px solid #dde3eb',
+  borderRadius: '7px', fontSize: '0.875rem', fontFamily: 'Source Sans 3, sans-serif', outline: 'none'
 }
 
 export default TraineeProfile

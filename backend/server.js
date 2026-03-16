@@ -7,6 +7,8 @@ const traineeRoutes = require('./routes/trainees');
 const skillRoutes = require('./routes/skills');
 const notificationRoutes = require('./routes/notifications');
 const settingsRoutes = require('./routes/settings');
+const callLogRoutes = require('./routes/callogs');
+
 require('dotenv').config();
 
 const app = express();
@@ -37,6 +39,7 @@ app.use('/api/trainees', traineeRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/calllogs', callLogRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚑 EMS Tracker running on http://localhost:${PORT}`);

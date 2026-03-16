@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
-const { requireRole } = require('../middleware/auth');
+const { requireRole, requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -69,6 +69,29 @@ router.put('/:id', requireRole('admin'), (req, res) => {
 router.delete('/:id', requireRole('admin'), (req, res) => {
   db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
   res.json({ message: 'User deleted.' });
+});
+
+// POST /api/users/change-password — any logged in user can change their own
+router.post('/change-password', requireAuth, (req, res) => {
+  const { id: userId } = req.session.user;
+  const { current_password, new_password } = req.body;
+
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Current and new password are required.' });
+  }
+  if (new_password.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  if (!bcrypt.compareSync(current_password, user.password)) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+
+  const hashed = bcrypt.hashSync(new_password, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashed, userId);
+
+  res.json({ message: 'Password changed successfully.' });
 });
 
 module.exports = router;

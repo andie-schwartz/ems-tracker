@@ -10,13 +10,13 @@ function Layout({ user, setUser, children, currentPage, setCurrentPage }) {
   }
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '⊞' },
-    { id: 'trainees', label: user.role === 'trainee' ? 'My Progress' : user.role === 'instructor' ? 'My Trainees' : 'All Trainees', icon: '👥' },
-    { id: 'notifications', label: 'Alerts', icon: '🔔', roles: ['admin', 'instructor'] },
-    { id: 'users', label: 'Users', icon: '🔑', roles: ['admin'] },
-     { id: 'skills', label: 'Skills', icon: '📋', roles: ['admin'] },
-    { id: 'settings', label: 'Settings', icon: '⚙', roles: ['admin'] },
-  ].filter(item => !item.roles || item.roles.includes(user.role))
+  { id: 'dashboard', label: 'Dashboard', icon: '⊞' },
+  { id: 'trainees', label: user.role === 'trainee' ? 'My Progress' : user.role === 'instructor' ? 'My Trainees' : 'All Trainees', icon: '👥' },
+  { id: 'notifications', label: 'Alerts', icon: '🔔', roles: ['admin', 'instructor'] },
+  { id: 'skills', label: 'Skills', icon: '📋', roles: ['admin'] },
+  { id: 'users', label: 'Users', icon: '🔑', roles: ['admin'] },
+  { id: 'settings', label: 'Settings', icon: '⚙' },
+].filter(item => !item.roles || item.roles.includes(user.role))
 
   const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase()
 

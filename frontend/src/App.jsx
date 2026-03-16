@@ -33,7 +33,7 @@ function App() {
       {currentPage === 'profile' && <TraineeProfile traineeId={selectedTrainee} user={user} setCurrentPage={setCurrentPage} />}
       {currentPage === 'notifications' && <Notifications />}
       {currentPage === 'users' && <Users />}
-      {currentPage === 'settings' && <Settings />}
+      {currentPage === 'settings' && <Settings user={user} />}
       {currentPage === 'skills' && <Skills />}
     </Layout>
   )
