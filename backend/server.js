@@ -8,6 +8,7 @@ const skillRoutes = require('./routes/skills');
 const notificationRoutes = require('./routes/notifications');
 const settingsRoutes = require('./routes/settings');
 const callLogRoutes = require('./routes/callogs');
+const path = require('path');
 
 require('dotenv').config();
 
@@ -28,11 +29,6 @@ app.use(session({
   }
 }));
 
-// Test route
-app.get('/', (req, res) => {
-  res.json({ message: 'EMS Tracker API is running!' });
-});
-
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/trainees', traineeRoutes);
@@ -40,6 +36,19 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/calllogs', callLogRoutes);
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Any route that isn't an API route serves the React app
+app.get('/{*path}', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  }
+});
+
+
+
 
 app.listen(PORT, () => {
   console.log(`🚑 EMS Tracker running on http://localhost:${PORT}`);
