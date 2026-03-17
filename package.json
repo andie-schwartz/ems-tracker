@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   
-  "scripts": {
-  "start": "node backend/server.js",
-  "dev": "nodemon backend/server.js"
+ "scripts": {
+  "start": "npm run build && node backend/server.js",
+  "dev": "nodemon backend/server.js",
+  "build": "cd frontend && npm install && npm run build",
+  "init-db": "node backend/db/init.js"
 },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
