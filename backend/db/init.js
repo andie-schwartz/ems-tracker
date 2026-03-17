@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const DB_PATH = process.env.NODE_ENV === 'production'
   ? '/app/data/ems.db'
   : path.join(__dirname, 'ems.db');
-  
+
 const db = new Database(DB_PATH);
 
 db.pragma('journal_mode = WAL');
@@ -77,7 +77,18 @@ db.exec(`
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
-`);
+
+CREATE TABLE IF NOT EXISTS call_logs (
+    id            TEXT PRIMARY KEY,
+    trainee_id    TEXT NOT NULL REFERENCES trainees(id) ON DELETE CASCADE,
+    call_date     DATE NOT NULL,
+    call_type     TEXT NOT NULL,
+    supervisor    TEXT,
+    notes         TEXT,
+    logged_by     TEXT NOT NULL REFERENCES users(id),
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+    `);
 
 console.log('✅ Tables created');
 
