@@ -1,4 +1,6 @@
-const db = require('better-sqlite3')('backend/db/ems.db');
+const DB_PATH = process.env.NODE_ENV === 'production' ? '/app/data/ems.db' : 'backend/db/ems.db';
+const db = require('better-sqlite3')(DB_PATH);
+
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
