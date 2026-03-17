@@ -3,14 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  
- "scripts": {
-  "start": "node backend/server.js",
-  "dev": "nodemon backend/server.js",
-  "build": "npm install --prefix frontend && npm run build --prefix frontend",
-  "init-db": "node backend/db/init.js"
-},
-
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "build": "npm run build --prefix frontend",
+    "init-db": "node backend/db/init.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
