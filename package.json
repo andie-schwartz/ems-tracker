@@ -5,9 +5,9 @@
   "main": "index.js",
   
  "scripts": {
-  "start": "npm run build && node backend/server.js",
+  "start": "node backend/server.js",
   "dev": "nodemon backend/server.js",
-  "build": "cd frontend && npm install && npm run build",
+  "build": "npm install --prefix frontend && npm run build --prefix frontend",
   "init-db": "node backend/db/init.js"
 },
 
