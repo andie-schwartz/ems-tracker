@@ -88,7 +88,12 @@ CREATE TABLE IF NOT EXISTS call_logs (
     logged_by     TEXT NOT NULL REFERENCES users(id),
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
   );
-    `);
+  CREATE TABLE IF NOT EXISTS trainee_instructors (
+    trainee_id    TEXT NOT NULL REFERENCES trainees(id) ON DELETE CASCADE,
+    instructor_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    PRIMARY KEY (trainee_id, instructor_id)
+  );  
+  `);
 
 console.log('✅ Tables created');
 
