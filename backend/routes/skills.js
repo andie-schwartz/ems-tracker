@@ -152,9 +152,22 @@ router.post('/evaluate', requireRole('admin', 'instructor'), (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(id, trainee_id, skill_id, score, userId, notes || null);
 
-  // Check if score triggers an alert
+ // Check if score triggers an alert
   const { alert, pass } = getThresholds();
   if (score <= alert) {
+    // Notify all assigned instructors
+    const assignedInstructors = db.prepare(`
+      SELECT instructor_id FROM trainee_instructors WHERE trainee_id = ?
+    `).all(trainee_id);
+
+    // Also include primary instructor if not already in the list
+    if (trainee.instructor_id) {
+      const alreadyIncluded = assignedInstructors.find(i => i.instructor_id === trainee.instructor_id);
+      if (!alreadyIncluded) {
+        assignedInstructors.push({ instructor_id: trainee.instructor_id });
+      }
+    }
+
     db.prepare(`
       INSERT INTO notifications (id, trainee_id, skill_id, score)
       VALUES (?, ?, ?, ?)
